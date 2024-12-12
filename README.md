@@ -1,7 +1,7 @@
 # Large Concept Models
 ## Language Modeling in a Sentence Representation Space
 
-[[Blog]]() [[Paper]]()
+[[Blog]](https://ai.meta.com/blog/meta-fair-updates-agents-robustness-safety-architecture/) [[Paper]](https://ai.meta.com/research/publications/large-concept-models-language-modeling-in-a-sentence-representation-space/)
 
 This repository provides the official implementations and experiments for [Large Concept Models](https://ai.meta.com/research/publications/large-concept-models-language-modeling-in-a-sentence-representation-space/) (**LCM**).
 
