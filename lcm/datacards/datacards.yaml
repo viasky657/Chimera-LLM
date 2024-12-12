@@ -1,0 +1,20 @@
+# FIXME
+name: "pretraining_data"
+parquet_path:
+  #s3: "s3://dl.fbaipublicfiles.com/LCM/rocstories"
+  s3: "/large_experiments/lcm/data/sonarized/rocstories"
+source_column: "text_sentences_sonar_emb"
+source_text_column: "text_sentences"
+# partition columns:
+# "split" (train, validation)
+---
+# FIXME
+name: "finetuning_data"
+parquet_path:
+  s3: "/large_experiments/lcm/data/sonarized/cosmopedia_sample"
+source_column: prompt_sentences_sonar_emb
+source_text_column: prompt_sentences
+target_column: text_sentences_sonar_emb
+target_text_column: text_sentences
+# partition columns:
+# "split" (train, validation)
