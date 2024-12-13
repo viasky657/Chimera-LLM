@@ -308,6 +308,7 @@ If you use this codebase, please cite:
   title = {{Large Concept Models}: Language Modeling in a Sentence Representation Space},
   publisher = {arXiv},
   year = {2024},
+  url = {https://arxiv.org/abs/2412.08821},
 }
 ```
 
