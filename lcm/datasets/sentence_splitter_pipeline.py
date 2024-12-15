@@ -189,7 +189,6 @@ class SentenceSplitter(BatchMapper):
                 pad_last_batch=self.config.pad_last_batch,
                 remove_whitespace_before_inference=self.config.remove_whitespace_before_inference,
                 outer_batch_size=self.config.outer_batch_size,
-                return_paragraph_probabilities=False,
                 verbose=self.config.verbose,
             ),
         ):
@@ -270,12 +269,11 @@ class SentenceSplitter(BatchMapper):
             pad_last_batch=self.config.pad_last_batch,
             remove_whitespace_before_inference=self.config.remove_whitespace_before_inference,
             outer_batch_size=self.config.outer_batch_size,
-            do_paragraph_segmentation=False,
             verbose=self.config.verbose,
         )
         sentences = []
         for row in outputs:
-            sentences.append([z.strip() for y in row for z in y if z.strip()])
+            sentences.append([s.strip() for s in row if s.strip()])
 
         for idx, text in keep_texts:
             sentences.insert(idx, text)
