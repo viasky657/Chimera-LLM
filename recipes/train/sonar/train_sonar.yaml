@@ -1,0 +1,88 @@
+# @package trainer
+
+_trainer_: lcm.train.sonar.trainer.prepare_sonar_trainer
+
+requirements:
+  nodes: 1
+  tasks_per_node: 8
+  gpus_per_node: 8
+  cpus_per_task: 32
+  mem_gb: 256
+
+# Model configuration
+model_dim: 1024
+max_seq_len: 512
+num_encoder_layers: 24
+num_decoder_layers: 24
+num_encoder_attn_heads: 16
+num_decoder_attn_heads: 16
+ffn_inner_dim: 8192  # 1024 * 8
+
+# Training configuration
+learning_rate: 1e-4
+weight_decay: 0.01
+warmup_steps: 1000
+max_steps: 100000
+
+# Loss configuration
+contrastive_loss_weight: 1.0
+reconstruction_loss_weight: 1.0
+temperature: 0.07
+
+# Data configuration
+batch_size: 32
+max_tokens: 8192
+
+# Output and checkpointing
+output_dir: ??
+dtype: "torch.float32"
+use_optimizer_in_fp32: true
+use_fsdp: true
+fsdp_fp32_reduce: true
+
+# Training schedule
+lr_schedule: cosine
+validate_every_n_steps: 1000
+checkpoint_every_n_steps: 1000
+save_model_every_n_steps: 1000
+keep_last_n_checkpoints: 2
+publish_metrics_every_n_steps: 100
+preserve_consolidated_models: true
+
+# Other settings
+seed: 1
+profile: false
+
+data_loading_config:
+  max_tokens: 8192
+  nb_epochs: 5
+
+# Data configuration for aligned media-text pairs
+training_data:
+  - name: "media_text_pairs=train"
+    media_dir: "/path/to/train/media"
+    pairs_json: "/path/to/train/pairs.json"
+    validate_alignment: true
+    
+validation_data:
+  - name: "media_text_pairs=validation"
+    media_dir: "/path/to/validation/media"
+    pairs_json: "/path/to/validation/pairs.json"
+    validate_alignment: true
+
+# Example pairs.json format:
+# [
+#   {
+#     "id": "pair_001",
+#     "media_name": "image1.jpg",
+#     "text": "Description of image 1"
+#   },
+#   {
+#     "id": "pair_002",
+#     "media_name": "video1.mp4",
+#     "text": "Description of video 1"
+#   }
+# ]
+
+# Note: Each media file must have a unique ID and corresponding text description.
+# The alignment between media and text is strictly enforced during training.
