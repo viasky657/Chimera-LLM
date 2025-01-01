@@ -1,5 +1,5 @@
 Steps to Train Sonar Model List (TO-DO List)
-1. Add Images and Videos to abstract Conceptual learning Model with Binary encoder (Meta) instead of autotransformer (Sonar Encoder and Decoder). 
+1. Add Images and Videos to abstract Conceptual learning Model with Binary encoder (Meta) instead of autotransformer (Sonar Encoder and Decoder). (Added code needed for training but need to train)
 2. Add Gated Autoregressive encoder for the Sonar training to reduce gradiant learning knowledge saving errors. 
 3. Maybe add some of the audio learning dataset from Qwen Audio for understanding multiple speakers?
 
