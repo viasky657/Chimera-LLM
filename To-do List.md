@@ -4,7 +4,7 @@ Steps to Train Sonar Model List (TO-DO List)
 3. Maybe add some of the audio learning dataset from Qwen Audio for understanding multiple speakers?
 
 Steps to Train LCM (Large Concept Model) (Meta), LBM (Large Brain Model), B-Star (Model that can self-train and encourage exploration), Memory Layers (Meta) (Optmimized Self-Learning and Long Term Memory Storage), Binary Encoder (Meta), Flaming Filter (Meta):
-1. Add Brain LLM Arch to the LCM Long Term Memory (Transformer Arch) replacement.
+1. Add Brain LLM Arch to the LCM Long Term Memory (Transformer Arch) replacement. (Started but not complete)
 2. Add B-Star Model Arch to the Transformer Long Term Memory Part. 
 3. Add Memory Layers to the Transformer Long Term Memory Part. 
 4. Add Flaming Filter (if possible) at this step. 
