@@ -10,5 +10,10 @@ Steps to Train LCM (Large Concept Model) (Meta), LBM (Large Brain Model), B-Star
 4. Add Flaming Filter (if possible) at this step. 
 5. Add Binary encoder instead of autotokenizer.
 6. Add New Sonar model with additional training to the pipeline and replace the old sonar model. 
-7. Train the LLM on MRI and EEG datasets. 
+7. Train the LLM on MRI and EEG datasets.
 8. Add training for Opengpt dataset and the Pile dataset and maybe some other dataset if time(?)
+9. Add training for model Introspection for enhanced accuracy and preformance: https://arxiv.org/abs/2410.13787.
+
+Improvements
+1. Add complex thinking training datasets
+2. EEG and Free Will Study(?)
