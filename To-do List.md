@@ -20,6 +20,13 @@ Steps to Train LCM (Large Concept Model) (Meta), LBM (Large Brain Model), B-Star
 11. Add EEG Dataset (Taste, Hearing, etc.) (https://github.com/meagmohit/EEG-Datasets)
 
 Improvements
-1. Add complex thinking training datasets
+1. Add complex thinking training datasets:
+  - Marco-01: https://github.com/AIDC-AI/Marco-o1/blob/main/data/CoT_demo.json
+  - Openai Ultra: https://huggingface.co/datasets/O1-OPEN/OpenO1-SFT-Ultra
+  - Llava-COT: https://github.com/PKU-YuanGroup/LLaVA-CoT
 2. EEG and Free Will Study(?)
+3. Qwen Audio Datasets: https://github.com/QwenLM/Qwen-Audio
+4. Omniparser Datasets: https://github.com/microsoft/OmniParser
+5. Fine-Tuning Math Datasets: https://huggingface.co/datasets/HuggingFaceTB/finemath
+6. Programming Datasets: 
 
