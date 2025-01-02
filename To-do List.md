@@ -3,7 +3,7 @@ Steps to Train Sonar Model List (TO-DO List)
 2. Add Gated Autoregressive encoder for the Sonar training to reduce gradiant learning knowledge saving errors. 
 3. (Maybe add some of the audio learning dataset from Qwen Audio for understanding multiple speakers? - Probably best to add this to the LCM Model training directly instead of here)
 4. Add Smell Dataset training to SONAR (https://github.com/innovationcore/smell-datasets)
-5. Add Touch (tactile feel) Dataset to SONAR (https://huggingface.co/datasets/mlfu7/Touch-Vision-Language-Dataset)
+5. Add Touch (tactile feel) Dataset to SONAR (https://huggingface.co/datasets/mlfu7/Touch-Vision-Language-Dataset) and this touch dataset: (https://drive.google.com/drive/folders/1QOvbkIZtpJpz4Ry_Zg3ouXX-zLJNqu9m)
 
 Steps to Train LCM (Large Concept Model) (Meta), LBM (Large Brain Model), B-Star (Model that can self-train and encourage exploration), Memory Layers (Meta) (Optmimized Self-Learning and Long Term Memory Storage), Binary Encoder (Meta), Flaming Filter (Meta):
 1. Add Brain LLM Arch to the LCM Long Term Memory (Transformer Arch) replacement. (Started but not complete)
