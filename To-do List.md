@@ -13,7 +13,9 @@ Steps to Train LCM (Large Concept Model) (Meta), LBM (Large Brain Model), B-Star
 7. Train the LLM on MRI and EEG datasets.
 8. Add training for Opengpt dataset and the Pile dataset and maybe some other dataset if time(?)
 9. Add training for model Introspection for enhanced accuracy and preformance: https://arxiv.org/abs/2410.13787.
+10. Add architecture for self-evolving LLM by saving the tokens to the memory layer (meta) instead of the one suggested by the self-evolving paper: https://writer.com/engineering/self-evolving-models/.
 
 Improvements
 1. Add complex thinking training datasets
 2. EEG and Free Will Study(?)
+3. 
