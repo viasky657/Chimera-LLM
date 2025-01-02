@@ -18,4 +18,4 @@ Steps to Train LCM (Large Concept Model) (Meta), LBM (Large Brain Model), B-Star
 Improvements
 1. Add complex thinking training datasets
 2. EEG and Free Will Study(?)
-3. 
+
