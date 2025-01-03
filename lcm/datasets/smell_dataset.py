@@ -6,7 +6,7 @@ import numpy as np
 from typing import Dict, List, Optional, Tuple, Union
 from pathlib import Path
 from dataclasses import dataclass
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 
 from fairseq2.data import VocabularyInfo
 from fairseq2.models.sequence import SequenceBatch
@@ -219,7 +219,7 @@ def create_smell_dataloader(
     batch_size: int = 32,
     shuffle: bool = True,
     num_workers: int = 4,
-) -> "DataLoader":
+) -> DataLoader:
     """Create a DataLoader for smell data.
     
     Args:
@@ -235,8 +235,6 @@ def create_smell_dataloader(
     Returns:
         DataLoader instance
     """
-    from torch.utils.data import DataLoader
-    
     dataset = SmellDataset(
         data_dir=data_dir,
         label_map=label_map,
