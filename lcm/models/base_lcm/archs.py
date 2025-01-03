@@ -10,6 +10,7 @@ from lcm.models.base_lcm.builder import (
     lcm_arch,
 )
 from lcm.nn.transformer.brain_llm import BrainLLMConfig
+from fairseq2.nn.transformer import TransformerConfig
 
 
 # Every model must register a toy_{model_family}
