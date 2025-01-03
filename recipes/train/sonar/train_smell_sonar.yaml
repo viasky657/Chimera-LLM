@@ -25,6 +25,10 @@ model:
     ngram_vocab_size: 200000
     dropout_p: 0.1
     attention_dropout_p: 0.1
+    
+    # Gated Sparse Autoencoder configuration
+    sae_hidden_dim: 4096  # Number of dictionary elements (M)
+    sae_l1_coef: 0.01    # Sparsity penalty coefficient (λ)
   
   # Encoder config  
   encoder:

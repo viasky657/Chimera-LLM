@@ -1,0 +1,139 @@
+# Training recipe for SONAR with sound data
+
+defaults:
+  - /train/defaults
+  - /common/launcher/standalone
+
+# Model configuration
+model:
+  _name: sonar_byte
+  model_dim: 1024
+  max_seq_len: 128  # For sound sequences
+  
+  # Frontend config
+  frontend:
+    model_dim: 1024
+    local_model_dim: 512
+    num_local_layers: 1
+    num_local_heads: 8
+    local_ffn_dim: 2048
+    window_size: 64  # Match sound sequence length
+    min_patch_size: 1
+    max_patch_size: 16
+    entropy_threshold: 0.5
+    ngram_sizes: [3, 4, 5, 6, 7, 8]
+    ngram_vocab_size: 200000
+    dropout_p: 0.1
+    attention_dropout_p: 0.1
+    
+    # Gated Sparse Autoencoder configuration
+    sae_hidden_dim: 4096  # Number of dictionary elements (M)
+    sae_l1_coef: 0.01    # Sparsity penalty coefficient (λ)
+  
+  # Encoder config  
+  encoder:
+    num_layers: 24
+    num_heads: 16
+    ffn_dim: 8192
+    dropout_p: 0.1
+    attention_dropout_p: 0.1
+  
+  # Pooling config
+  pooling: attention
+  pooler:
+    num_heads: 8
+    dropout_p: 0.1
+
+# Training configuration
+trainer:
+  _name: byte
+  max_tokens: 16384
+  update_freq: 1
+  max_seq_len: 128
+  label_smoothing: 0.1
+  clip_norm: 1.0
+  save_interval_steps: 1000
+  keep_last_checkpoints: 5
+  log_interval_steps: 100
+
+# Optimization
+optimization:
+  optimizer:
+    _name: adam
+    lr: 1e-4
+    betas: [0.9, 0.98]
+    eps: 1e-8
+    weight_decay: 0.01
+  
+  lr_scheduler:
+    _name: inverse_sqrt
+    warmup_steps: 4000
+    warmup_init_lr: 1e-7
+
+# Data configuration
+data:
+  train:
+    _name: sound
+    ontology_path: /workspaces/Chimera-LLM/ontology/ontology.json
+    data_dir: /workspaces/Chimera-LLM/sound-datasets/train  # Assuming this directory exists
+    sequence_length: 64  # Match sequence length
+    stride: 32          # 50% overlap between windows
+    normalize: true     # Normalize sound features
+    batch_size: 32
+    num_workers: 4
+    shuffle: true
+  
+  valid:
+    _name: sound
+    ontology_path: /workspaces/Chimera-LLM/ontology/ontology.json
+    data_dir: /workspaces/Chimera-LLM/sound-datasets/valid  # Assuming this directory exists
+    sequence_length: 64
+    stride: 32
+    normalize: true
+    batch_size: 32
+    num_workers: 4
+    shuffle: false
+
+# Training resources
+resources:
+  nodes: 1
+  gpus_per_node: 8
+  cpus_per_task: 10
+  mem_gb: 480
+
+# Distributed training
+distributed:
+  backend: nccl
+  find_unused_parameters: false
+
+# Checkpointing
+checkpoint:
+  save_dir: checkpoints/sonar_sound
+  keep_last_epochs: 5
+  save_interval_updates: ${trainer.save_interval_steps}
+  keep_interval_updates: ${trainer.keep_last_checkpoints}
+  
+# Logging
+logging:
+  level: INFO
+  format: simple
+  interval_steps: ${trainer.log_interval_steps}
+  
+hydra:
+  run:
+    dir: outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    dir: multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${hydra.job.num}
+
+# Additional sound-specific settings
+sound:
+  # Feature normalization settings
+  feature_min: -1.0
+  feature_max: 1.0
+  
+  # Audio processing settings
+  sample_rate: 44100
+  n_fft: 2048
+  hop_length: 512
+  n_mels: 128

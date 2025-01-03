@@ -1,10 +1,11 @@
-"""Byte-level frontend for SONAR models."""
+"""Byte-level frontend for SONAR models with Gated Sparse Autoencoder."""
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from typing import Optional, Tuple, Dict
+from typing import Optional, Tuple, Dict, NamedTuple
 from dataclasses import dataclass
+from lcm.nn.gated_sparse_autoencoder import GatedSparseAutoencoder, GatedSAEConfig
 from fairseq2.models.transformer import TransformerFrontend
 from fairseq2.nn.padding import PaddingMask
 from fairseq2.nn.transformer import (
@@ -18,11 +19,15 @@ from torch import Tensor
 
 @dataclass
 class ByteFrontendConfig:
-    """Configuration for byte-level frontend."""
+    """Configuration for byte-level frontend with Gated SAE."""
     
     # Model dimensions
     model_dim: int = 1024
     local_model_dim: int = 512
+    
+    # Gated SAE config
+    sae_hidden_dim: int = 4096  # Number of dictionary elements (M)
+    sae_l1_coef: float = 0.01  # Sparsity penalty coefficient (λ)
     
     # Architecture
     num_local_layers: int = 1
@@ -106,8 +111,14 @@ class ByteEntropyModel(nn.Module):
             mask[i, start:i+1] = False
         return mask
 
+class ByteFrontendOutput(NamedTuple):
+    """Output from ByteTransformerFrontend including SAE losses."""
+    patches: torch.Tensor
+    padding_mask: Optional[PaddingMask]
+    sae_loss: Optional[torch.Tensor]
+
 class ByteTransformerFrontend(TransformerFrontend):
-    """Byte-level frontend with dynamic patching."""
+    """Byte-level frontend with dynamic patching and Gated Sparse Autoencoder."""
     
     def __init__(
         self,
@@ -117,6 +128,14 @@ class ByteTransformerFrontend(TransformerFrontend):
         super().__init__()
         
         self.config = config
+        
+        # Initialize Gated SAE
+        sae_config = GatedSAEConfig(
+            input_dim=config.model_dim,
+            hidden_dim=config.sae_hidden_dim,
+            l1_coef=config.sae_l1_coef
+        )
+        self.sparse_autoencoder = GatedSparseAutoencoder(sae_config)
         
         # Byte embeddings
         self.byte_embeddings = nn.Embedding(256, config.local_model_dim)
@@ -239,7 +258,7 @@ class ByteTransformerFrontend(TransformerFrontend):
         self,
         seqs: Tensor,
         padding_mask: Optional[PaddingMask] = None,
-    ) -> Tuple[Tensor, Optional[PaddingMask]]:
+    ) -> ByteFrontendOutput:
         """Process byte sequences into patch representations."""
         # Get n-gram embeddings
         ngram_embeds = self._compute_ngram_embeddings(seqs)
@@ -270,6 +289,14 @@ class ByteTransformerFrontend(TransformerFrontend):
         patches = self.layer_norm(patches)
         patches = self.dropout(patches)
         
+        # Process patches with Gated SAE
+        if self.training:
+            recon, gate_pre, z = self.sparse_autoencoder(patches)
+            sae_loss = self.sparse_autoencoder.compute_loss(patches, recon, gate_pre, z)
+            patches = recon  # Use reconstructed patches during training
+        else:
+            sae_loss = None
+        
         # Update padding mask for patches
         if padding_mask is not None:
             patch_lens = boundaries.sum(dim=1)
@@ -277,4 +304,4 @@ class ByteTransformerFrontend(TransformerFrontend):
         else:
             patch_padding_mask = None
             
-        return patches, patch_padding_mask
+        return ByteFrontendOutput(patches, patch_padding_mask, sae_loss)

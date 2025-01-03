@@ -18,6 +18,10 @@ num_encoder_attn_heads: 16
 num_decoder_attn_heads: 16
 ffn_inner_dim: 8192  # 1024 * 8
 
+# Gated Sparse Autoencoder configuration
+sae_hidden_dim: 4096  # Number of dictionary elements (M)
+sae_l1_coef: 0.01    # Sparsity penalty coefficient (λ)
+
 # Training configuration
 learning_rate: 1e-4
 weight_decay: 0.01

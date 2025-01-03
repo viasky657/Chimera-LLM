@@ -8,6 +8,7 @@ from torch.utils.data import DataLoader, Dataset
 
 from .smell_dataset import create_smell_dataloader, SmellDataset
 from .video_image_dataset import create_video_image_text_dataloader
+from .sound_dataset import create_sound_dataloader, SoundDataset
 
 # Create dataset registry
 dataset_registry = DatasetRegistry("sonar")
@@ -48,6 +49,24 @@ def _create_video_image_text_dataset(
         model_dim=config.get("model_dim", 1024),
         num_workers=config.get("num_workers", 4),
         shuffle=is_training and config.get("shuffle", True),
+    )
+
+@dataset_registry.register("sound")
+def _create_sound_dataset(
+    config: Dict[str, Any],
+    *,
+    is_training: bool = True,
+) -> "DataLoader[SoundDataset]":
+    """Create sound dataset from config."""
+    return create_sound_dataloader(
+        ontology_path=config["ontology_path"],
+        data_dir=config["data_dir"],
+        sequence_length=config.get("sequence_length", 64),
+        stride=config.get("stride", 32),
+        normalize=config.get("normalize", True),
+        batch_size=config.get("batch_size", 32),
+        shuffle=is_training and config.get("shuffle", True),
+        num_workers=config.get("num_workers", 4),
     )
 
 # Export registry

@@ -20,7 +20,7 @@ from lcm.datasets.video_image_dataset import MediaTextAlignmentError
 
 @dataclass
 class SonarTrainingConfig(TrainingConfig):
-    """Configuration for SONAR model training."""
+    """Configuration for SONAR model training with Gated SAE."""
     
     model_dim: int = 1024
     max_seq_len: int = 512
@@ -29,6 +29,10 @@ class SonarTrainingConfig(TrainingConfig):
     num_encoder_attn_heads: int = 16
     num_decoder_attn_heads: int = 16
     ffn_inner_dim: int = 8192  # 1024 * 8
+    
+    # Gated SAE config
+    sae_hidden_dim: int = 4096  # Number of dictionary elements (M)
+    sae_l1_coef: float = 0.01  # Sparsity penalty coefficient (λ)
     
     # Training specific configs
     learning_rate: float = 1e-4
@@ -174,24 +178,39 @@ class SonarTrainer(Trainer):
         pair_ids = batch["pair_ids"]
         
         # Forward pass through encoder for both modalities
-        media_encoding = self.encoder(media_batch)
-        text_encoding = self.encoder(text_batch)
+        media_output = self.encoder(media_batch)
+        text_output = self.encoder(text_batch)
+        
+        # Extract embeddings and SAE losses
+        media_embeddings = media_output.patches if hasattr(media_output, 'patches') else media_output.sentence_embeddings
+        text_embeddings = text_output.patches if hasattr(text_output, 'patches') else text_output.sentence_embeddings
+        
+        media_sae_loss = getattr(media_output, 'sae_loss', None)
+        text_sae_loss = getattr(text_output, 'sae_loss', None)
         
         # Calculate contrastive loss between media and text encodings
         contrastive_loss = self.compute_contrastive_loss(
-            media_encoding.sentence_embeddings,
-            text_encoding.sentence_embeddings,
+            media_embeddings,
+            text_embeddings,
             pair_ids
         )
         
         # Reconstruction loss for media
-        media_reconstruction = self.decoder(media_encoding)
+        media_reconstruction = self.decoder(media_output)
         reconstruction_loss = self.reconstruction_criterion(media_reconstruction, media_batch.seqs)
+        
+        # Combine SAE losses if present
+        sae_loss = 0.0
+        if media_sae_loss is not None:
+            sae_loss += media_sae_loss
+        if text_sae_loss is not None:
+            sae_loss += text_sae_loss
         
         # Combined loss with weights from config
         total_loss = (
             self.config.contrastive_loss_weight * contrastive_loss +
-            self.config.reconstruction_loss_weight * reconstruction_loss
+            self.config.reconstruction_loss_weight * reconstruction_loss +
+            sae_loss  # SAE loss is already weighted internally
         )
         
         # Backward pass
@@ -203,6 +222,7 @@ class SonarTrainer(Trainer):
         return {
             "contrastive_loss": contrastive_loss.item(),
             "reconstruction_loss": reconstruction_loss.item(),
+            "sae_loss": sae_loss.item() if isinstance(sae_loss, torch.Tensor) else 0.0,
             "total_loss": total_loss.item()
         }
 
