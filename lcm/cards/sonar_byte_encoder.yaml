@@ -1,0 +1,58 @@
+_name: sonar_text_encoder
+arch: basic
+
+# Model dimensions
+model_dim: 1024
+max_seq_len: 4096  # Increased for byte sequences
+
+# Frontend config for byte-level processing
+frontend:
+  _name: byte
+  model_dim: 1024
+  local_model_dim: 512
+  num_local_layers: 1
+  num_local_heads: 8
+  local_ffn_dim: 2048
+  window_size: 512
+  min_patch_size: 1
+  max_patch_size: 16
+  entropy_threshold: 0.5
+  ngram_sizes: [3, 4, 5, 6, 7, 8]
+  ngram_vocab_size: 200000
+  dropout_p: 0.1
+  attention_dropout_p: 0.1
+
+# Main encoder config (unchanged)
+encoder:
+  model_dim: ${model_dim}
+  num_layers: 24
+  num_heads: 16
+  ffn_dim: 8192
+  dropout_p: 0.1
+  attention_dropout_p: 0.1
+  activation_fn: gelu
+  norm_order: pre
+
+# Pooling config
+pooling: attention
+pooler:
+  _name: attention
+  num_heads: 8
+  dropout_p: 0.1
+
+# Training config
+optimizer:
+  _name: adam
+  lr: 1e-4
+  betas: [0.9, 0.98]
+  eps: 1e-8
+  weight_decay: 0.01
+
+lr_scheduler:
+  _name: inverse_sqrt
+  warmup_steps: 4000
+  warmup_init_lr: 1e-7
+
+# Data processing
+max_tokens: 16384  # Increased for byte sequences
+update_freq: 1

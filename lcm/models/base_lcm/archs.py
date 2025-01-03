@@ -7,9 +7,9 @@ from lcm.models.base_lcm.builder import (
     BaseLCModelConfig,
     LCMFrontendConfig,
     ProjectionConfig,
-    TransformerConfig,
     lcm_arch,
 )
+from lcm.nn.transformer.brain_llm import BrainLLMConfig
 
 
 # Every model must register a toy_{model_family}
@@ -20,29 +20,26 @@ def toy_base_lcm() -> BaseLCModelConfig:
     )
 
 
-@lcm_arch("base_lcm_1_6B")
-def base_lcm_1_6B() -> BaseLCModelConfig:
-    """Base 1.6B model
-    Parameter Size: 1,647,635,456
+@lcm_arch("brain_llm")
+def brain_llm() -> BaseLCModelConfig:
+    """Brain LLM architecture from the paper
+    Uses masked autoencoder structure with 4-layer encoder and 2-layer decoder
     """
-    model_dim: int = 2048
-    num_attn_heads: int = 16
     return BaseLCModelConfig(
-        max_seq_len=4096,
-        model_dim=model_dim,
+        max_seq_len=4240,  # Context length from paper
+        model_dim=512,     # From paper
         sonar_embed_dim=1024,
         sonar_normalizer_name="dummy_sonar_normalizer",
         frontend=LCMFrontendConfig(),
-        lcm=TransformerConfig(
-            final_dropout_p=0.0,
-            attention_dropout_p=0.0,
+        lcm=BrainLLMConfig(
+            model_dim=512,          # From paper
+            ffn_inner_dim=1024,     # From paper
+            num_encoder_layers=4,   # From paper
+            num_decoder_layers=2,   # From paper
+            num_heads=4,            # From paper
+            patch_size=20,          # From paper
             dropout_p=0.1,
-            mha_output_proj_bias=True,
-            ffn_inner_dim=model_dim * 4,
-            num_attn_heads=num_attn_heads,
-            num_layers=32,
-            pos_embedding_style="rope",
-            use_swiglu=True,
+            attention_dropout_p=0.1,
             layer_normalization_style="rms",
         ),
         postnet=ProjectionConfig(),

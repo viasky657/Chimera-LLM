@@ -1,15 +1,31 @@
-# Copyright (c) Meta Platforms, Inc. and affiliates.
-# All rights reserved.
-#
-#
+"""SONAR model implementations."""
 
-# We import all the model types in order to populate the model type registry
-from lcm.models.base_lcm.loader import BASE_LCM_MODEL_TYPE
-from lcm.models.two_tower_diffusion_lcm.loader import (
-    TWO_TOWER_DIFFUSION_LCM_MODEL_TYPE,
+from .sonar_byte_frontend import ByteTransformerFrontend, ByteFrontendConfig
+from .sonar_byte_builder import (
+    create_sonar_byte_model,
+    SonarByteConfig,
+    SonarByteBuilder,
 )
+from .sonar_byte_registry import model_registry as byte_model_registry
+from .sonar_byte_registry import trainer_registry as byte_trainer_registry
+
+# Import registries
+from fairseq2.models.utils import ModelRegistry
+
+# Create unified registry
+model_registry = ModelRegistry("sonar")
+
+# Register byte-level components
+model_registry.register_module("byte", byte_model_registry)
+model_registry.register_module("byte_trainer", byte_trainer_registry)
 
 __all__ = [
-    "BASE_LCM_MODEL_TYPE",
-    "TWO_TOWER_DIFFUSION_LCM_MODEL_TYPE",
+    # Byte-level components
+    "ByteTransformerFrontend",
+    "ByteFrontendConfig",
+    "create_sonar_byte_model",
+    "SonarByteConfig",
+    "SonarByteBuilder",
+    # Registries
+    "model_registry",
 ]
