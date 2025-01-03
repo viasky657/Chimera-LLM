@@ -62,34 +62,52 @@ class SmellDataset(Dataset):
         
         # Process each CSV file
         for csv_file in self.data_dir.glob("*.csv"):
-            # Read data
-            df = pd.read_csv(csv_file)
-            
-            # Get sensor columns (s_0 through s_63)
-            sensor_cols = [f"s_{i}" for i in range(64)]
-            
-            # Extract sensor readings
-            sensor_data = df[sensor_cols].values
-            temp_data = df["temperature"].values
-            humidity_data = df["humidity"].values
-            
-            # Get label from filename or map
-            label = self.label_map.get(csv_file.stem, csv_file.stem)
-            
-            # Create sliding windows
-            for i in range(0, len(df) - self.sequence_length + 1, self.stride):
-                window = sensor_data[i:i + self.sequence_length]
-                temp = temp_data[i:i + self.sequence_length].mean()
-                humidity = humidity_data[i:i + self.sequence_length].mean()
+            try:
+                # Skip first 4 lines (metadata and headers)
+                df = pd.read_csv(csv_file, skiprows=4)
                 
-                samples.append(SmellSample(
-                    sensor_readings=torch.tensor(window, dtype=torch.float32),
-                    temperature=temp,
-                    humidity=humidity,
-                    label=label,
-                    sample_id=f"{csv_file.stem}_{i}"
-                ))
+                # Get sensor columns (ch1 through ch64)
+                sensor_cols = [f"ch{i}" for i in range(1, 65)]
                 
+                # Extract sensor readings
+                sensor_data = df[sensor_cols].values
+                temp_data = df["temperature"].values
+                humidity_data = df["humidity"].values
+                
+                # Get base name without number suffix for label mapping
+                base_name = '_'.join(csv_file.stem.split('_')[:-1])  # e.g., "CocaCola_1" -> "CocaCola"
+                if not base_name:  # Handle case where there's no underscore
+                    base_name = csv_file.stem
+                
+                # Get label from filename or map
+                label = self.label_map.get(base_name, base_name)
+            
+                # Validate sequence length
+                if self.sequence_length <= 0:
+                    raise ValueError("sequence_length must be positive")
+                if self.stride <= 0:
+                    raise ValueError("stride must be positive")
+                
+                # Create sliding windows
+                for i in range(0, len(df) - self.sequence_length + 1, self.stride):
+                    window = sensor_data[i:i + self.sequence_length]
+                    temp = temp_data[i:i + self.sequence_length].mean()
+                    humidity = humidity_data[i:i + self.sequence_length].mean()
+                    
+                    samples.append(SmellSample(
+                        sensor_readings=torch.tensor(window, dtype=torch.float32),
+                        temperature=temp,
+                        humidity=humidity,
+                        label=label,
+                        sample_id=f"{csv_file.stem}_{i}"
+                    ))
+            except Exception as e:
+                print(f"Error loading {csv_file}: {str(e)}")
+                continue
+                
+        if not samples:
+            print("Warning: No valid samples were loaded")
+            
         return samples
     
     def _compute_normalization_stats(self) -> None:

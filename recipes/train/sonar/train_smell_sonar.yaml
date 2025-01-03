@@ -70,25 +70,67 @@ optimization:
 data:
   train:
     _name: smell
-    data_dir: /path/to/smell/train/data
+    data_dir: /workspaces/Chimera-LLM/smell-datasets/raw_data/fw_3_0_1/smell_annotator
     label_map:
-      sample1: coffee
-      sample2: red_bull
-      # Add more label mappings
-    sequence_length: 64
-    stride: 32
-    normalize: true
+      # Coffee variants
+      Starbucks_Dark_Coffee_Cold: coffee_cold
+      "Starbucks Dark Roast Coffee Hot": coffee_hot
+      "Starbucks dark roast coffee hot": coffee_hot
+      "Starbucks Dark Roast Coffee": coffee_room
+      # Energy drink
+      RedBull: redbull_room
+      RedBull_Cold: redbull_cold
+      # Soda
+      CocaCola: cola_room
+      CocaCola_Cold: cola_cold
+      # Tea
+      PureLeaf_SweetTea: tea_room
+      PureLeaf_SweetTea_Cold: tea_cold
+      # Juice
+      Motts_AppleJuice: juice_room
+      Motts_AppleJuice_Cold: juice_cold
+      # Water
+      Dasani_Water: water_room
+      Dasani_Water_Cold: water_cold
+      # Control samples
+      Ambient_Air: ambient_air
+      Ambient_Room: ambient_room
+      Ambient_room: ambient_room  # Handle lowercase variant
+    sequence_length: 64  # Match sensor sequence length
+    stride: 32          # 50% overlap between windows
+    normalize: true     # Normalize sensor readings
     batch_size: 32
     num_workers: 4
     shuffle: true
   
   valid:
     _name: smell
-    data_dir: /path/to/smell/valid/data
+    data_dir: /workspaces/Chimera-LLM/smell-datasets/raw_data/fw_3_0_1/smell_annotator
     label_map:
-      sample1: coffee
-      sample2: red_bull
-      # Add more label mappings
+      # Coffee variants
+      Starbucks_Dark_Coffee_Cold: coffee_cold
+      "Starbucks Dark Roast Coffee Hot": coffee_hot
+      "Starbucks dark roast coffee hot": coffee_hot
+      "Starbucks Dark Roast Coffee": coffee_room
+      # Energy drink
+      RedBull: redbull_room
+      RedBull_Cold: redbull_cold
+      # Soda
+      CocaCola: cola_room
+      CocaCola_Cold: cola_cold
+      # Tea
+      PureLeaf_SweetTea: tea_room
+      PureLeaf_SweetTea_Cold: tea_cold
+      # Juice
+      Motts_AppleJuice: juice_room
+      Motts_AppleJuice_Cold: juice_cold
+      # Water
+      Dasani_Water: water_room
+      Dasani_Water_Cold: water_cold
+      # Control samples
+      Ambient_Air: ambient_air
+      Ambient_Room: ambient_room
+      Ambient_room: ambient_room  # Handle lowercase variant
     sequence_length: 64
     stride: 32
     normalize: true
@@ -140,8 +182,17 @@ smell:
   
   # Label categories
   categories:
-    - coffee
-    - red_bull
-    - tea
-    - soda
-    # Add more categories as needed
+    - coffee_cold
+    - coffee_hot
+    - redbull_room
+    - redbull_cold
+    - cola_room
+    - cola_cold
+    - tea_room
+    - tea_cold
+    - juice_room
+    - juice_cold
+    - water_room
+    - water_cold
+    - ambient_air
+    - ambient_room
