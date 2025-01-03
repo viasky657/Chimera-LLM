@@ -4,9 +4,9 @@ from typing import Any, Dict, Optional
 from pathlib import Path
 
 from fairseq2.data import DatasetRegistry
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 
-from .smell_dataset import create_smell_dataloader
+from .smell_dataset import create_smell_dataloader, SmellDataset
 from .video_image_dataset import create_video_image_text_dataloader
 
 # Create dataset registry
@@ -17,7 +17,7 @@ def _create_smell_dataset(
     config: Dict[str, Any],
     *,
     is_training: bool = True,
-) -> DataLoader:
+) -> "DataLoader[SmellDataset]":
     """Create smell dataset from config."""
     return create_smell_dataloader(
         data_dir=config["data_dir"],
