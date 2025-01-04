@@ -34,4 +34,4 @@ Improvements
 9. Add Gated Autoregressive encoder for the Sonar training to reduce gradiant learning knowledge saving errors (https://arxiv.org/abs/2404.16014). (Still need to add to touch dataset for training). []
 10. Add Spause Synatic Smoothing with sparse encoders that eliminates all 0 values and keeps all the benefits of keeping rare tokens to better accomadate for rare situations: https://arxiv.org/abs/2410.11462 []
 
-Note: Most of this data is covered under Apache License, Creative Commons License, but the image datasets may be copyrighted as the datasets were unclear as to what license it was hosted under. 
+Note: Most of this data is covered under the Apache License and Creative Commons License, but the image datasets may be restricted copyrighted as the datasets were unclear as to what license it was hosted under or where the images were sourced from or if they had approval for the images being used in AI development. Please use this model with caution. 
