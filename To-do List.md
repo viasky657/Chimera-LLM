@@ -1,4 +1,4 @@
-Steps to Train Sonar Model List (TO-DO List) []
+Steps to Train Custom LCM Byte Latent Model List (TO-DO List) []
 1. Add Images (https://storage.googleapis.com/openimages/web/index.html and https://paperswithcode.com/dataset/stylegallery and Videos (https://github.com/OpenGVLab/InternVideo/tree/main/Data/InternVid and https://huggingface.co/datasets/OpenGVLab/InternVid-Full and https://zhenglinpan.github.io/sakuga_dataset_webpage/) to abstract Conceptual learning Model with Binary encoder (Meta) instead of autotransformer (Sonar Encoder and Decoder). (Added code needed for training but need to train) []
 5. Add Smell Dataset training to SONAR (https://github.com/innovationcore/smell-datasets) [X]
 6. Add General Sound Dataset training to SONAR (https://github.com/audioset/ontology/issues/9). []
