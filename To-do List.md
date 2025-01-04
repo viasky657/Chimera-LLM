@@ -34,3 +34,4 @@ Improvements
 7. The Pile (General Knowledge Large Dataset): https://pile.eleuther.ai/ []
 8. The function-calling dataset (Hammer): https://github.com/MadeAgents/Hammer and https://huggingface.co/datasets/MadeAgents/xlam-irrelevance-7.5k []
 
+Note: Most of this data is covered under Apache License, Creative Commons License, but the image datasets may be copyrighted as the datasets were unclear as to what license it was hosted under. 
