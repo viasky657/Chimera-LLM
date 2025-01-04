@@ -21,7 +21,7 @@ Steps to Train LCM (Large Concept Model) (Meta): https://ai.meta.com/research/pu
 
 Improvements
 1. Add complex thinking training datasets:
-  - Marco-01: https://github.com/AIDC-AI/Marco-o1/blob/main/data/CoT_demo.json
+  - Marco-01: https://github.com/AIDC-AI/Marco-o1/blob/main/data/CoT_demo.json and this dataset for fine-tuning on instruction following and reasoning enhancements: https://github.com/UKPLab/arxiv2024-divergent-cot. 
   - Openai Ultra: https://huggingface.co/datasets/O1-OPEN/OpenO1-SFT-Ultra
   - Llava-COT: https://github.com/PKU-YuanGroup/LLaVA-CoT
 2. EEG and Free Will Study(?)
