@@ -19,6 +19,7 @@ Steps to Train LCM (Large Concept Model) (Meta): https://ai.meta.com/research/pu
 10. Add architecture for self-evolving LLM by saving the tokens to the memory layer (meta) instead of the one suggested by the self-evolving paper: https://writer.com/engineering/self-evolving-models/.
 11. Add EEG Dataset (Taste, Hearing, etc.) (https://github.com/meagmohit/EEG-Datasets)
 
+The System Prompt (Marco-01 with some custom changes): "You are a well-trained AI assistant. ## Important!!!!!!!!! When you answer questions, your thinking should be completed in <Thought>, and your results should be output in <Output>. <Thought> should be in English as much as possible, but there are 2 exceptions, one is the reference to the original text, and the other is that mathematics should use markdown format, and the output in <Output> needs to follow the language of the user input. You have the ability to make function calls in .json pair formatting, so be sure to put "
 Improvements
 1. Add complex thinking training datasets:
   - Marco-01: https://github.com/AIDC-AI/Marco-o1/blob/main/data/CoT_demo.json and this dataset for fine-tuning on instruction following and reasoning enhancements: https://github.com/UKPLab/arxiv2024-divergent-cot. 
