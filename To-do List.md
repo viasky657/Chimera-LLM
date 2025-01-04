@@ -9,7 +9,7 @@ Steps to Train Sonar Model List (TO-DO List) []
 Steps to Train LCM (Large Concept Model) (Meta): https://ai.meta.com/research/publications/large-concept-models-language-modeling-in-a-sentence-representation-space/, LBM (Large Brain Model), B-Star (Model that can self-train and encourage exploration), Memory Layers (Meta) (Optmimized Self-Learning and Long Term Memory Storage), Binary Encoder (Meta), Flaming Filter (Meta):
 1. Add Brain LLM Arch to the LCM Long Term Memory (Transformer Arch) replacement. (Started but not complete) (https://www.biorxiv.org/content/10.1101/2023.09.12.557460v2) []
 2. Add B-Star Model Arch to the Transformer Long Term Memory Part: https://github.com/hkust-nlp/B-STaR and https://arxiv.org/pdf/2412.17256. []
-3. Placeholder
+3. Add EEG dataset (after set-up) for images and emotions: (emotions, etc.: https://openbci.com/community/publicly-available-eeg-datasets/)(images to EEG dataset: https://huggingface.co/datasets/Alljoined/05_125) []
 4. Add Memory Layers to the Transformer Long Term Memory Part: https://ai.meta.com/research/publications/memory-layers-at-scale/. []
 5. Add Flaming Filter (if possible) at this step: https://ai.meta.com/research/publications/flame-factuality-aware-alignment-for-large-language-models/. []
 6. Add Binary encoder instead of autotokenizer: https://ai.meta.com/research/publications/byte-latent-transformer-patches-scale-better-than-tokens/. []
