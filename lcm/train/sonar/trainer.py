@@ -142,12 +142,22 @@ class SonarTrainer(Trainer):
         )
 
     def compute_contrastive_loss(self, media_embeddings: torch.Tensor, text_embeddings: torch.Tensor, pair_ids: List[str]) -> torch.Tensor:
-        """Compute contrastive loss between media and text embeddings with alignment verification."""
+        """Compute InfoNCE contrastive loss between media and text embeddings.
+        
+        This implements the InfoNCE loss formula:
+        L = -log(exp(sim(z_i1,z_i2)/τ) / Σ_j exp(sim(z_i1,z_j2)/τ))
+        
+        Where:
+        - sim is cosine similarity (implemented via normalized dot product)
+        - τ (tau) is the temperature parameter
+        - z_i1, z_i2 are matching embedding pairs
+        - z_j2 represents all possible text embeddings (including z_i2)
+        """
         # Verify pair alignment
         if len(set(pair_ids)) != len(pair_ids):
             raise MediaTextAlignmentError("Duplicate pair IDs found in batch")
         
-        # Normalize embeddings
+        # Normalize embeddings for cosine similarity
         media_embeddings = F.normalize(media_embeddings, p=2, dim=1)
         text_embeddings = F.normalize(text_embeddings, p=2, dim=1)
         
@@ -159,14 +169,33 @@ class SonarTrainer(Trainer):
                 if id1 == id2:
                     alignment_matrix[i, j] = 1
         
-        # Compute similarity matrix
+        # Compute similarity matrix (contains all pairwise similarities)
         similarity = torch.matmul(media_embeddings, text_embeddings.t())
         
-        # Compute cross entropy loss using alignment matrix as target
-        loss_media_to_text = F.cross_entropy(similarity / self.config.temperature, alignment_matrix)
-        loss_text_to_media = F.cross_entropy(similarity.t() / self.config.temperature, alignment_matrix.t())
+        # Scale similarities by temperature
+        similarity = similarity / self.config.temperature
         
-        return (loss_media_to_text + loss_text_to_media) / 2
+        # Compute InfoNCE loss
+        # For each media embedding, compute loss against all text embeddings
+        exp_sim = torch.exp(similarity)
+        
+        # Numerator: exp(sim(z_i1,z_i2)/τ) - only for matching pairs
+        numerator = torch.sum(exp_sim * alignment_matrix, dim=1)
+        
+        # Denominator: Σ_j exp(sim(z_i1,z_j2)/τ) - sum over all text embeddings
+        denominator = torch.sum(exp_sim, dim=1)
+        
+        # Compute loss: -log(numerator/denominator)
+        loss_media_to_text = -torch.log(numerator / denominator)
+        
+        # Repeat in the other direction (text to media)
+        loss_text_to_media = -torch.log(
+            torch.sum(exp_sim * alignment_matrix, dim=0) /
+            torch.sum(exp_sim, dim=0)
+        )
+        
+        # Average bidirectional loss
+        return (loss_media_to_text.mean() + loss_text_to_media.mean()) / 2
 
     def train_step(self, batch):
         """Perform a single training step."""
