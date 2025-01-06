@@ -13,9 +13,10 @@ from example_byte_encoder import ByteEncoder, ByteEncoderConfig
 from eeg_encoder import EEGEncoder, EEGEncoderConfig
 from modality_fusion import ModalityFusion, ModalityFusionConfig
 from entropy_model import EntropyModel, EntropyModelConfig
+from bstar_memory import BStarMemory, BStarSharedMemoryFFN
 
 class BrainAwareBLTConfig:
-    """Configuration for brain-aware BLT model"""
+    """Configuration for brain-aware BLT model with B-STAR self-learning"""
     def __init__(
         self,
         byte_config: Optional[Dict] = None,
@@ -24,7 +25,12 @@ class BrainAwareBLTConfig:
         entropy_config: Optional[Dict] = None,
         max_sequence_length: int = 1024,
         use_entropy_patching: bool = True,
-        entropy_threshold: float = 0.5
+        entropy_threshold: float = 0.5,
+        memory_size: int = 1024,
+        memory_topk: int = 32,
+        initial_temperature: float = 1.0,
+        initial_exploration_rate: float = 0.1,
+        min_confidence: float = 0.2
     ):
         # Component configs
         self.byte_config = ByteEncoderConfig(**(byte_config or {}))
@@ -36,6 +42,13 @@ class BrainAwareBLTConfig:
         self.max_sequence_length = max_sequence_length
         self.use_entropy_patching = use_entropy_patching
         self.entropy_threshold = entropy_threshold
+        
+        # B-STAR memory settings
+        self.memory_size = memory_size
+        self.memory_topk = memory_topk
+        self.initial_temperature = initial_temperature
+        self.initial_exploration_rate = initial_exploration_rate
+        self.min_confidence = min_confidence
 
 class BrainAwareBLT(nn.Module):
     """Brain-aware BLT model"""
@@ -50,6 +63,34 @@ class BrainAwareBLT(nn.Module):
         self.byte_encoder = ByteEncoder(config.byte_config)
         self.eeg_encoder = EEGEncoder(config.eeg_config)
         self.fusion_module = ModalityFusion(config.fusion_config)
+        
+        # Add B-STAR memory layers
+        self.text_memory = BStarMemory(
+            dim=config.byte_config.hidden_size,
+            num_keys=config.memory_size,
+            topk=config.memory_topk,
+            temperature=config.initial_temperature,
+            exploration_rate=config.initial_exploration_rate,
+            min_confidence=config.min_confidence
+        )
+        
+        self.eeg_memory = BStarMemory(
+            dim=config.eeg_config.hidden_size,
+            num_keys=config.memory_size,
+            topk=config.memory_topk,
+            temperature=config.initial_temperature,
+            exploration_rate=config.initial_exploration_rate,
+            min_confidence=config.min_confidence
+        )
+        
+        self.fusion_memory = BStarMemory(
+            dim=config.fusion_config.fusion_dim,
+            num_keys=config.memory_size,
+            topk=config.memory_topk,
+            temperature=config.initial_temperature,
+            exploration_rate=config.initial_exploration_rate,
+            min_confidence=config.min_confidence
+        )
         
         if config.use_entropy_patching:
             self.entropy_model = EntropyModel(config.entropy_config)
@@ -73,37 +114,107 @@ class BrainAwareBLT(nn.Module):
         self,
         text: str,
         eeg_data: torch.Tensor,
-        return_intermediates: bool = False
+        temperature: float = 1.0,
+        threshold: float = 0.0,
+        return_intermediates: bool = False,
+        return_stats: bool = False
     ) -> Dict[str, torch.Tensor]:
         """Forward pass"""
-        # Get text features
+        # Get text features with memory
         text_outputs = self.encode_text(text, return_intermediates)
         text_features = text_outputs['last_hidden_state']
+        text_memory = self.text_memory(
+            text_features,
+            return_stats=return_stats
+        )
+        text_features = text_memory['output']
         
-        # Get EEG features
+        # Get EEG features with memory
         eeg_features = self.eeg_encoder(eeg_data)
+        eeg_memory = self.eeg_memory(
+            eeg_features,
+            return_stats=return_stats
+        )
+        eeg_features = eeg_memory['output']
         
-        # Fuse modalities
+        # Fuse modalities with memory
         fusion_outputs = self.fusion_module(
             text_features,
             eeg_features,
             return_intermediates
         )
+        fusion_memory = self.fusion_memory(
+            fusion_outputs['joint_features'],
+            return_stats=return_stats
+        )
+        fused_features = fusion_memory['output']
         
         # Get logits
-        logits = self.output_proj(fusion_outputs['joint_features'])
+        logits = self.output_proj(fused_features)
         
         # Prepare output
         results = {
             'logits': logits,
             'text_features': text_features,
             'eeg_features': eeg_features,
-            'fused_features': fusion_outputs['joint_features']
+            'fused_features': fused_features,
+            'memory_updates': {
+                'text_memory': {
+                    'indices': text_memory['indices'],
+                    'values': text_features,
+                    'confidences': text_memory['confidence']
+                },
+                'eeg_memory': {
+                    'indices': eeg_memory['indices'],
+                    'values': eeg_features,
+                    'confidences': eeg_memory['confidence']
+                },
+                'fusion_memory': {
+                    'indices': fusion_memory['indices'],
+                    'values': fused_features,
+                    'confidences': fusion_memory['confidence']
+                }
+            }
         }
         
         if return_intermediates:
             results['text_intermediates'] = text_outputs.get('intermediate_states')
             results['fusion_intermediates'] = fusion_outputs.get('intermediates')
+            
+        if return_stats:
+            # Combine memory statistics
+            results['stats'] = {
+                'unique_memories': (
+                    text_memory['stats']['access_counts'].nonzero().size(0) +
+                    eeg_memory['stats']['access_counts'].nonzero().size(0) +
+                    fusion_memory['stats']['access_counts'].nonzero().size(0)
+                ),
+                'total_memories': (
+                    self.text_memory.num_keys +
+                    self.eeg_memory.num_keys +
+                    self.fusion_memory.num_keys
+                ),
+                'memory_entropy': (
+                    text_memory['stats']['exploration_scores'].mean().item() +
+                    eeg_memory['stats']['exploration_scores'].mean().item() +
+                    fusion_memory['stats']['exploration_scores'].mean().item()
+                ) / 3,
+                'correct_predictions': (
+                    (text_memory['confidence'] > threshold).float().sum().item() +
+                    (eeg_memory['confidence'] > threshold).float().sum().item() +
+                    (fusion_memory['confidence'] > threshold).float().sum().item()
+                ),
+                'total_predictions': (
+                    text_memory['confidence'].numel() +
+                    eeg_memory['confidence'].numel() +
+                    fusion_memory['confidence'].numel()
+                ),
+                'confidence': (
+                    text_memory['confidence'].mean().item() +
+                    eeg_memory['confidence'].mean().item() +
+                    fusion_memory['confidence'].mean().item()
+                ) / 3
+            }
         
         return results
     

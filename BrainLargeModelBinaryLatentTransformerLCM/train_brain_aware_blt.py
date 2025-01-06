@@ -18,6 +18,7 @@ from brain_aware_blt import BrainAwareBLT, BrainAwareBLTConfig
 from prepare_eeg_data import EEGDataPreprocessor, EEGPreprocessingConfig
 from multimodal_hierarchical_blt import ModalityEncoder, CrossModalFusion, ToBytes
 from hierarchical_blt import HierarchicalBLT
+from bstar_trainer import BStarTrainer
 import torchvision.transforms as transforms
 import torchaudio
 
@@ -3666,7 +3667,7 @@ class BrainAwareBLTTrainer:
         self.best_val_loss = checkpoint['best_val_loss']
 
 def main():
-    parser = argparse.ArgumentParser(description="Train brain-aware BLT model")
+    parser = argparse.ArgumentParser(description="Train brain-aware BLT model with B-STAR")
     parser.add_argument(
         "--train-data",
         type=Path,
@@ -3689,6 +3690,42 @@ def main():
         type=Path,
         help="Resume from checkpoint"
     )
+    parser.add_argument(
+        "--memory-size",
+        type=int,
+        default=1024,
+        help="Size of B-STAR memory"
+    )
+    parser.add_argument(
+        "--memory-topk",
+        type=int,
+        default=32,
+        help="Number of top-k memories to retrieve"
+    )
+    parser.add_argument(
+        "--initial-temperature",
+        type=float,
+        default=1.0,
+        help="Initial sampling temperature"
+    )
+    parser.add_argument(
+        "--initial-exploration",
+        type=float,
+        default=0.1,
+        help="Initial exploration rate"
+    )
+    parser.add_argument(
+        "--min-confidence",
+        type=float,
+        default=0.2,
+        help="Minimum confidence for memory updates"
+    )
+    parser.add_argument(
+        "--max-steps",
+        type=int,
+        default=100000,
+        help="Maximum training steps"
+    )
     args = parser.parse_args()
     
     # Setup logging
@@ -3696,41 +3733,72 @@ def main():
     logger = logging.getLogger(__name__)
     
     try:
-        # Create model config
-        config = TrainingConfig(
-            checkpoint_dir=args.checkpoint_dir,
-            modalities=['text', 'eeg', 'fmri']  # Example modalities
+        # Create model config with B-STAR settings
+        config = BrainAwareBLTConfig(
+            memory_size=args.memory_size,
+            memory_topk=args.memory_topk,
+            initial_temperature=args.initial_temperature,
+            initial_exploration_rate=args.initial_exploration,
+            min_confidence=args.min_confidence
         )
 
         # Create model
         model = BrainAwareBLT(config)
         
-        # Load your dataset here
-        # Example:
-        # train_dataset = MultimodalBrainAwareDataset(text_data, eeg_data, fmri_data, config)
-        # val_dataset = MultimodalBrainAwareDataset(val_text_data, val_eeg_data, val_fmri_data, config)
+        # Load dataset
+        logger.info("Loading datasets...")
+        train_dataset = MultimodalBrainAwareDataset(
+            text_data=load_text_data(args.train_data),
+            eeg_data=load_eeg_data(args.train_data),
+            fmri_data=load_fmri_data(args.train_data),
+            config=config,
+            augment_prob=0.5,  # Enable data augmentation
+            mask_prob=0.15     # Enable masking for MLM-style training
+        )
+        
+        val_dataset = None
+        if args.val_data:
+            val_dataset = MultimodalBrainAwareDataset(
+                text_data=load_text_data(args.val_data),
+                eeg_data=load_eeg_data(args.val_data),
+                fmri_data=load_fmri_data(args.val_data),
+                config=config,
+                augment_prob=0.0,  # No augmentation for validation
+                mask_prob=0.0      # No masking for validation
+            )
         
         # Create data loaders
         train_loader = DataLoader(
             train_dataset,
-            batch_size=config.batch_size,
+            batch_size=32,
             shuffle=True,
-            num_workers=config.num_workers
+            num_workers=4,
+            pin_memory=True
         )
         
-        val_loader = DataLoader(
-            val_dataset,
-            batch_size=config.batch_size,
-            shuffle=False,
-            num_workers=config.num_workers
-        ) if args.val_data else None
+        val_loader = None
+        if val_dataset is not None:
+            val_loader = DataLoader(
+                val_dataset,
+                batch_size=32,
+                shuffle=False,
+                num_workers=4,
+                pin_memory=True
+            )
         
-        # Create trainer
-        trainer = BrainAwareBLTTrainer(
+        # Create B-STAR trainer
+        trainer = BStarTrainer(
             model=model,
             train_loader=train_loader,
             val_loader=val_loader,
-            config=config
+            learning_rate=1e-4,
+            warmup_steps=1000,
+            max_steps=args.max_steps,
+            eval_every=1000,
+            save_every=5000,
+            checkpoint_dir=args.checkpoint_dir,
+            device='cuda',
+            use_wandb=True
         )
         
         # Resume from checkpoint if specified
@@ -3738,15 +3806,35 @@ def main():
             logger.info(f"Resuming from checkpoint: {args.resume}")
             trainer.load_checkpoint(args.resume)
         
-        # Train model
-        logger.info("Starting training...")
+        # Train model with B-STAR
+        logger.info("Starting B-STAR training...")
         trainer.train()
         
-        logger.info("Training completed!")
+        logger.info("Training completed successfully!")
+        
+        # Save final model
+        final_path = args.checkpoint_dir / "final_model.pt"
+        logger.info(f"Saving final model to {final_path}")
+        trainer.save_checkpoint("final_model.pt")
         
     except Exception as e:
         logger.error(f"Training failed: {str(e)}")
         raise
+
+def load_text_data(data_dir: Path):
+    """Load text data from directory"""
+    # Implement text data loading
+    pass
+
+def load_eeg_data(data_dir: Path):
+    """Load EEG data from directory"""
+    # Implement EEG data loading
+    pass
+
+def load_fmri_data(data_dir: Path):
+    """Load fMRI data from directory"""
+    # Implement fMRI data loading
+    pass
 
 if __name__ == "__main__":
     main()
