@@ -1,0 +1,9 @@
+[submodule "SONAR"]
+	path = SONAR
+	url = https://github.com/facebookresearch/SONAR.git
+[submodule "ontology"]
+	path = ontology
+	url = https://github.com/audioset/ontology.git
+[submodule "smell-datasets"]
+	path = smell-datasets
+	url = https://github.com/innovationcore/smell-datasets.git
