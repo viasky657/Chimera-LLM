@@ -1,4 +1,5 @@
-Add Flame Meta Gaurd to model
+Add Flame Meta Gaurd to model [X]
 Add Gated Auto encoders sparse attention to improve model accuracy. 
 Add Smooth sparse attention to increase diversity in answers. 
 Add Hyper parameter method tuning to simplify hyper parameters so they no longer are affected by model size. 
+Add Self-Evolving Mechanism and PFT Prefrontal Cortex inspired safety networks
