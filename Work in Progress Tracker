@@ -3,3 +3,4 @@ Add Gated Auto encoders sparse attention to improve model accuracy.
 Add Smooth sparse attention to increase diversity in answers. 
 Add Hyper parameter method tuning to simplify hyper parameters so they no longer are affected by model size. 
 Add Self-Evolving Mechanism and PFT Prefrontal Cortex inspired safety networks
+Add Safety Training Datasets for PFT model: https://huggingface.co/datasets/nvidia/Aegis-AI-Content-Safety-Dataset-1.0 and https://github.com/Zjh-819/LLMDataHub
