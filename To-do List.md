@@ -14,7 +14,6 @@ Steps to Train LCM (Large Concept Model) (Meta): https://ai.meta.com/research/pu
 8. Train the LLM on MRI and EEG datasets: https://exhibits.stanford.edu/data/browse/openfmri-datasets, https://openneuro.org/, https://paperswithcode.com/dataset/raider, https://sites.google.com/site/depressiondatabase/, https://pmc.ncbi.nlm.nih.gov/articles/PMC10615764/ []
 9. Add training for model Introspection for enhanced accuracy and preformance: https://arxiv.org/abs/2410.13787. []
 10. Add architecture for self-evolving LLM by saving the tokens to the memory layer (meta) instead of the one suggested by the self-evolving paper: https://writer.com/engineering/self-evolving-models/. []
-11. Add EEG Dataset (Taste, Hearing, etc.) (https://github.com/meagmohit/EEG-Datasets) []
 
 The System Prompt (Marco-01 with some custom changes): "You are a well-trained AI assistant. ## Important!!!!!!!!! When you answer questions, your thinking should be completed in <Thought>, and your results should be output in <Output>. <Thought> should be in English as much as possible, but there are 2 exceptions, one is the reference to the original text, and the other is that mathematics should use markdown format, and the output in <Output> needs to follow the language of the user input. ## Important!!!!!! You have the ability to make function calls in .json pair formatting, so be sure to put all function calls in the tags called <Tool></Tool> within the <Output> xml tags when you need to use a tool."
 
@@ -23,12 +22,9 @@ Improvements
   - Marco-01: https://github.com/AIDC-AI/Marco-o1/blob/main/data/CoT_demo.json and this dataset for fine-tuning on instruction following and reasoning enhancements: https://github.com/UKPLab/arxiv2024-divergent-cot. []
   - Openai Ultra: https://huggingface.co/datasets/O1-OPEN/OpenO1-SFT-Ultra and the original Openai-SFT COT dataset: https://huggingface.co/datasets/O1-OPEN/OpenO1-SFT []
   - Llava-COT: https://github.com/PKU-YuanGroup/LLaVA-CoT []
-2. EEG and Free Will Study(?) []
-3. Qwen Audio Datasets: https://github.com/QwenLM/Qwen-Audio []
 4. Omniparser Datasets: https://github.com/microsoft/OmniParser []
 5. Fine-Tuning Math Datasets: https://huggingface.co/datasets/HuggingFaceTB/finemath, https://huggingface.co/deepseek-ai/DeepSeek-Prover-V1, []
 6. Programming Datasets: https://huggingface.co/datasets/theblackcat102/evol-codealpaca-v1, https://github.com/src-d/datasets []
-7. The Pile (General Knowledge Large Dataset): https://pile.eleuther.ai/ []
 8. The function-calling dataset (Hammer): https://github.com/MadeAgents/Hammer and https://huggingface.co/datasets/MadeAgents/xlam-irrelevance-7.5k []
 9. Add Gated Autoregressive encoder for the Sonar training to reduce gradiant learning knowledge saving errors (https://arxiv.org/abs/2404.16014). (Still need to add to touch dataset for training). []
 10. Add Spause Synatic Smoothing with sparse encoders that eliminates all 0 values and keeps all the benefits of keeping rare tokens to better accomadate for rare situations: https://arxiv.org/abs/2410.11462 []
