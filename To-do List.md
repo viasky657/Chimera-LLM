@@ -1,7 +1,7 @@
 Steps to Train Custom LCM Byte Latent Model List (TO-DO List) []
 1. Add Images (https://storage.googleapis.com/openimages/web/index.html) and Videos (https://github.com/OpenGVLab/InternVideo/tree/main/Data/InternVid and https://huggingface.co/datasets/OpenGVLab/InternVid-Full and https://zhenglinpan.github.io/sakuga_dataset_webpage/) to abstract Conceptual learning Model with Binary encoder (Meta) instead of autotransformer (Sonar Encoder and Decoder). (Added code needed for training but need to train) []
-2. MRI Emotion Dataset: https://osf.io/26rhz/, Love emotion dataset: https://pmc.ncbi.nlm.nih.gov/articles/PMC4327739/figure/F1/, 
-3. 
+2. MRI Emotion Dataset Fear/Nuetral: https://osf.io/26rhz/, Love emotion dataset: https://pmc.ncbi.nlm.nih.gov/articles/PMC4327739/figure/F1/, Emotion Dataset: Happy, Sad, Fear, Nuetral, Angry: https://med.stanford.edu/content/dam/sm/scsnl/documents/Zhang_BigData_EmotionalDevelopment_2019.pdf (IMPORTANT ETHICAL CLARIFICATIONS: This is ONLY TO MONITOR the LLM MRI-SCAN BRAIN MODEL TO BE SURE THAT IT DOES NOT HAVE HUMAN-LIKE SENTIENCE AND TO BE NOTIFIED IN THE EXTREMELY-RARE UNINTENDED EVENT THAT THE LLM GAINS IT SOMEHOW AS AN EMERGENT BEHAVIOR DURING TRAINING. TO CLARIFY, THESE DATASETS ARE NOT BEING USED TO TRAIN AN LLM TO SIMULATE HUMAN EMOTIONS.THE PURPOSE OF THIS LLM PROGRAM IS TO SERVE HUMANS AND NOT TO REPLICATE HUMAN BEHAVIOR.)
+3. MRI Deep Sleep NREM Dataset: https://www.jneurosci.org/content/42/12/2503?utm_source=chatgpt.com, https://www.jneurosci.org/contefnt/jneuro/42/12/2503/F4.large.jpg 
 5. Add Smell Dataset training to SONAR (https://github.com/innovationcore/smell-datasets) [X]
 6. Add General Sound Dataset training to SONAR (https://github.com/audioset/ontology/issues/9). []
 7. Add Touch (tactile feel) Dataset to SONAR (https://huggingface.co/datasets/mlfu7/Touch-Vision-Language-Dataset) and this touch dataset: (https://drive.google.com/drive/folders/1QOvbkIZtpJpz4Ry_Zg3ouXX-zLJNqu9m). []
